@@ -12,11 +12,19 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 import java.io.File;
-import java.util.Arrays;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+/**
+ * todo 1. 支持指定目录的文件结构转换为对应的包结构 2. 支持schema generate java时注入注释
+ */
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class GraphqlCodegenMojo extends AbstractMojo {
 
@@ -31,10 +39,18 @@ public class GraphqlCodegenMojo extends AbstractMojo {
     @Parameter
     private Map<String, String> customAnnotationsMapping;
     @Parameter
+    private Map<String, String> customGenericsMapping;
+    @Parameter
     private String packageName;
 
     @Parameter(defaultValue = "true")
     private boolean generateApis;
+
+    @Parameter(defaultValue = "false")
+    private boolean generateSingleApi;
+
+    @Parameter(defaultValue = "false")
+    private boolean needDataFetchingEnvironmentParamInSingleApi;
 
     @Parameter(defaultValue = "false")
     private boolean generateEqualsAndHashCode;
@@ -78,9 +94,13 @@ public class GraphqlCodegenMojo extends AbstractMojo {
         mappingConfig.setApiPackageName(apiPackageName);
         mappingConfig.setModelPackageName(modelPackageName);
         mappingConfig.setGenerateApis(generateApis);
+        mappingConfig.setGenerateSingleApi(generateSingleApi);
+        mappingConfig.setNeedDataFetchingEnvironmentParamInSingleApi(needDataFetchingEnvironmentParamInSingleApi);
         mappingConfig.setModelValidationAnnotation(modelValidationAnnotation);
         mappingConfig.setCustomAnnotationsMapping(
                 customAnnotationsMapping != null ? customAnnotationsMapping : new HashMap<>());
+        mappingConfig.setCustomGenericsMapping(
+                customGenericsMapping != null ? customGenericsMapping : new HashMap<>());
         mappingConfig.setGenerateEqualsAndHashCode(generateEqualsAndHashCode);
         mappingConfig.setGenerateToString(generateToString);
         mappingConfig.setSubscriptionReturnType(subscriptionReturnType);
@@ -88,12 +108,14 @@ public class GraphqlCodegenMojo extends AbstractMojo {
         MappingConfigSupplier mappingConfigSupplier = buildJsonSupplier(jsonConfigurationFile);
 
         try {
-            new GraphqlCodegen(Arrays.asList(graphqlSchemaPaths), outputDir, mappingConfig, mappingConfigSupplier).generate();
+            new GraphqlCodegen(graphqlSchemaPaths, outputDir, mappingConfig, mappingConfigSupplier).generate();
         } catch (Exception e) {
             getLog().error(e);
             throw new MojoExecutionException("Code generation failed. See above for the full exception.");
         }
     }
+
+
 
     private MappingConfigSupplier buildJsonSupplier(String jsonConfigurationFile) {
         if (jsonConfigurationFile != null && !jsonConfigurationFile.isEmpty()) {
@@ -186,6 +208,14 @@ public class GraphqlCodegenMojo extends AbstractMojo {
         this.customAnnotationsMapping = customAnnotationsMapping;
     }
 
+    public Map<String, String> getCustomGenericsMapping() {
+        return customGenericsMapping;
+    }
+
+    public void setCustomGenericsMapping(Map<String, String> customGenericsMapping) {
+        this.customGenericsMapping = customGenericsMapping;
+    }
+
     public String getModelValidationAnnotation() {
         return modelValidationAnnotation;
     }
@@ -200,6 +230,22 @@ public class GraphqlCodegenMojo extends AbstractMojo {
 
     public void setGenerateApis(boolean generateApis) {
         this.generateApis = generateApis;
+    }
+
+    public boolean isGenerateSingleApi() {
+        return generateSingleApi;
+    }
+
+    public void setGenerateSingleApi(boolean generateSingleApi) {
+        this.generateSingleApi = generateSingleApi;
+    }
+
+    public boolean isNeedDataFetchingEnvironmentParamInSingleApi() {
+        return needDataFetchingEnvironmentParamInSingleApi;
+    }
+
+    public void setNeedDataFetchingEnvironmentParamInSingleApi(boolean needDataFetchingEnvironmentParamInSingleApi) {
+        this.needDataFetchingEnvironmentParamInSingleApi = needDataFetchingEnvironmentParamInSingleApi;
     }
 
     public boolean isGenerateEqualsAndHashCode() {

@@ -1,6 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.github.kobylynskyi</groupId>
+<!--    <groupId>io.github.kobylynskyi</groupId>-->
+    <groupId>com.onepiece.graphql</groupId>
     <artifactId>graphql-codegen-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
     <version>1.3.1-SNAPSHOT</version>
@@ -38,15 +39,29 @@
         <tag>v1.3.0</tag>
     </scm>
 
+<!--    <distributionManagement>-->
+<!--        <snapshotRepository>-->
+<!--            <id>ossrh</id>-->
+<!--            <url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
+<!--        </snapshotRepository>-->
+<!--        <repository>-->
+<!--            <id>ossrh</id>-->
+<!--            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>-->
+<!--        </repository>-->
+<!--    </distributionManagement>-->
+
     <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
         <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>nexus</id>
+            <name>nexus-releases</name>
+            <url>http://nexus-server:8081/repository/maven-releases/</url>
         </repository>
+
+        <snapshotRepository>
+            <id>nexus</id>
+            <name>nexus-snapshots</name>
+            <url>http://nexus-server:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
     </distributionManagement>
 
     <ciManagement>
@@ -69,7 +84,7 @@
         <version.maven-scm-provider-gitexe>1.11.2</version.maven-scm-provider-gitexe>
         <version.maven-gpg-plugin>1.6</version.maven-gpg-plugin>
 
-        <version.graphql-java-codegen>1.3.0</version.graphql-java-codegen>
+        <version.graphql-java-codegen>1.3.1-SNAPSHOT</version.graphql-java-codegen>
     </properties>
 
     <dependencies>
@@ -91,7 +106,7 @@
         </dependency>
 
         <dependency>
-            <groupId>io.github.kobylynskyi</groupId>
+            <groupId>com.onepiece.graphql</groupId>
             <artifactId>graphql-java-codegen</artifactId>
             <version>${version.graphql-java-codegen}</version>
         </dependency>
